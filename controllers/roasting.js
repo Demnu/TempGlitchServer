@@ -171,10 +171,12 @@ const getCalculations = async (req, res) => {
   Calculation.find({}, function (err, calculations) {
     var calculationsMap = [];
     calculations.forEach(function (calculation) {
+      date = new Date (calculation.date)
+      
       calculationsMap.push({
         id: calculation._id,
         title: calculation.title,
-        date: calculation.date,
+        date: date.toLocaleDateString() + " " + date.toLocaleTimeString(),
         products: calculation.products,
         beans: calculation.beans,
         orderIDs: calculation.orderIDs,

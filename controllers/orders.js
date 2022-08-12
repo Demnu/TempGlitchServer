@@ -5,10 +5,11 @@ const getAllOrders = async (req, res) => {
     var ordersMap = [];
 
     orders.forEach(function (order) {
+      date = new Date (order.date)
       ordersMap.push({
         id: order.orderID,
         customerName: order.customerName,
-        date: order.date,
+        date: date.toLocaleDateString(),
         products: order.products,
         supplierName: order.supplierName,
       });
