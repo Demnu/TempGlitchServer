@@ -6,12 +6,16 @@ const getAllRecipes = (async (req, res) => {
 	RecipeMongo.find({}, function (err, recipes) {
     var recipesMap = [];
     recipes.forEach(function(recipe) {
-      console.log("found")
-      var beans = [];
-
-      console.log(beans);
       
-      recipesMap.push({_id:recipe._id, id: recipe.product, bean1Name: recipe.bean1Name,bean1Amount: recipe.bean1Amount, bean2Name: recipe.bean2Name, bean2Amount: recipe.bean2Amount})
+      recipesMap.push({_id:recipe._id, id: recipe.product, 
+        bean1Name: recipe.bean1Name,bean1Amount: recipe.bean1Amount, 
+        bean2Name: recipe.bean2Name, bean2Amount: recipe.bean2Amount,
+        bean3Name: recipe.bean3Name, bean3Amount: recipe.bean3Amount,
+        bean4Name: recipe.bean4Name, bean4Amount: recipe.bean4Amount,
+        bean5Name: recipe.bean5Name, bean5Amount: recipe.bean5Amount,
+        bean6Name: recipe.bean6Name, bean6Amount: recipe.bean6Amount,
+        bean7Name: recipe.bean7Name, bean7Amount: recipe.bean7Amount,
+        bean8Name: recipe.bean8Name, bean8Amount: recipe.bean8Amount,})
     });
     res.send(recipesMap);
   })
@@ -68,8 +72,7 @@ const getRecipe = (async (req, res, next) => {
 })
 
 const updateRecipe = (async (req, res, next) => {
-  const { id: id } = req.params
-  const recipe = await RecipeMongo.findOneAndUpdate({ _id: id }, req.body, {
+  const recipe = await RecipeMongo.findOneAndUpdate({ _id: req.body._id }, req.body, {
     new: true,
     runValidators: true,
   })
