@@ -41,11 +41,11 @@ const createRecipe = async (req, res) => {
 }
 
 const deleteRecipe = async (req, res, next) => {
-  const { id: id } = req.params
   console.log(req.params)
-  const recipe = await RecipeMongo.findOneAndDelete({ product: id })
+
+  const recipe = await RecipeMongo.findOneAndDelete({ _id: req.params.id })
   if (!recipe) {
-    res.status(404).send("No recipe with id: " + id)
+    res.status(404).send("No recipe with id: " + req.params.id)
   }
   else{
     res.status(200).json({ recipe })
