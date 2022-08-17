@@ -18,7 +18,7 @@ const counter = require("./counter");
 const port = 3000;
 app.use(function (req, res, next) {
   res.header("Access-Control-Expose-Headers", "X-Total-Count, Content-Range");
-  res.header("Access-Control-Allow-Origin", "http://localhost:3001"),
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000"),
     res.header("Access-Control-Allow-Credentials", "true"),
     res.header(
       "Access-Control-Allow-Methods",
@@ -26,7 +26,7 @@ app.use(function (req, res, next) {
     ),
     res.header(
       "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-custom-header"
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
     );
   next();
 });
@@ -34,10 +34,10 @@ app.options("/*", (_, res) => {
   res.sendStatus(200);
 });
 
-app.use("/api/v1/orders", orders);
-app.use("/api/v1/recipes", recipes);
-app.use("/api/v1/products", products);
-app.use("/api/v1/roasting", roasting);
+app.use("/api/v1/orders", auth, orders);
+app.use("/api/v1/recipes", auth, recipes);
+app.use("/api/v1/products", auth, products);
+app.use("/api/v1/roasting", auth, roasting);
 app.use("/api/v1/user", user);
 
 app.use(express.static(path.join(__dirname, "build")));
@@ -66,6 +66,38 @@ const start = async () => {
     console.log(error);
   }
 };
-
+const executeReadEmailScript = () => {
+  const python = spawn(process.env.PYTHON_CMD, [
+    "readEmails.py",
+    process.env.GMAIL_ADDRESS,
+    process.env.GMAIL_APP_PASSWORD,
+  ]);
+  python.stdout.on("data", function (data) {
+    dataToSend = data.toString();
+  });
+  python.on("close", (code) => {
+    executeDeleteEmailsScript();
+  });
+};
+const executeDeleteEmailsScript = () => {
+  const python = spawn(process.env.PYTHON_CMD, [
+    "deleteEmails.py",
+    process.env.GMAIL_ADDRESS,
+    process.env.GMAIL_APP_PASSWORD,
+  ]);
+  python.stdout.on("data", function (data) {
+    dataToSend = data.toString();
+  });
+  python.on("close", (code) => {
+    console.log(dataToSend);
+    counter.output();
+  });
+};
+console.log(__dirname + "/client/app/index.js");
 
 start();
+executeReadEmailScript();
+setInterval(async () => {
+  console.log("Executing Script at " + new Date());
+  executeReadEmailScript();
+}, 1000000);

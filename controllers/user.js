@@ -19,6 +19,7 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
+  console.log(req.body)
   const user = await User.findOne({ email: req.body.email });
   var error;
   var valid = false;

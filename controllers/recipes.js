@@ -22,21 +22,17 @@ const getAllRecipes = (async (req, res) => {
 })
 
 const createRecipe = async (req, res) => {
-  // recipe = {product:"Haywire Blend Recipe",bean1Name:"Columbia",bean1Amount:"1000", bean2Name:"Ethiopian",bean2Amount:"500",bean3Name:"Ethiopian",bean3Amount:"500",bean4Name:"Ethiopian",bean4Amount:"500",bean5Name:"Columbia",bean5Amount:"1000", bean6Name:"Ethiopian",bean6Amount:"500",bean7Name:"Ethiopian",bean7Amount:"500",bean8Name:"Ethiopian",bean8Amount:"500", };
-  recipe = {product: req.body.product, bean1Name: req.body.bean1Name}
   var duplicate = false;
-  console.log(recipe)
-  await RecipeMongo.create(req.body).catch(function (error){
-    console.log("duplicate")
+  result = await RecipeMongo.create(req.body.params).catch(function (error){
+    console.log(error)
     duplicate = true;
   })
   if(duplicate){
-    res.status(404).send("duplicate")
+    res.status(400).send("duplicate")
 
   }
   else{
-    res.status(201).json({ recipe })
-
+    res.status(201).json({ result })
   }
 }
 
