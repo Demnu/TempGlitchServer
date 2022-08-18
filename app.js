@@ -35,15 +35,15 @@ app.options("/*", (_, res) => {
   res.sendStatus(200);
 });
 
-// app.use("/api/v1/orders", auth, orders);
-// app.use("/api/v1/recipes", auth, recipes);
-// app.use("/api/v1/products", auth, products);
-// app.use("/api/v1/roasting", auth, roasting);
+app.use("/api/v1/orders", auth, orders);
+app.use("/api/v1/recipes", auth, recipes);
+app.use("/api/v1/products", auth, products);
+app.use("/api/v1/roasting", auth, roasting);
 
-app.use("/api/v1/orders", orders);
-app.use("/api/v1/recipes", recipes);
-app.use("/api/v1/products", products);
-app.use("/api/v1/roasting", roasting);
+// app.use("/api/v1/orders", orders);
+// app.use("/api/v1/recipes", recipes);
+// app.use("/api/v1/products", products);
+// app.use("/api/v1/roasting", roasting);
 
 app.use("/api/v1/user", user);
 
