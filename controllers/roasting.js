@@ -171,9 +171,9 @@ const getCalculations = async (req, res) => {
   Calculation.find({}, function (err, calculations) {
     var calculationsMap = [];
     calculations.forEach(function (calculation) {
-      date = new Date (calculation.date)
+      date = new Date(calculation.date)
       let day = date.getDate();
-      let month = date.getMonth() +1;
+      let month = date.getMonth() + 1;
       let year = date.getFullYear();
       let dateStr = day + "/" + month + "/" + year
       calculationsMap.push({
@@ -185,7 +185,7 @@ const getCalculations = async (req, res) => {
         orderIDs: calculation.orderIDs,
       });
     });
-    res.send(calculationsMap);
+    res.send(calculationsMap.reverse());
   });
 };
 
