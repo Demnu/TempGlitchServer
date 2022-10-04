@@ -139,10 +139,12 @@ const makeCalculation = async (req, res) => {
         return true;
       });
       if (!duplicate) {
-        beans.push({
-          name: recipeBean.name,
-          amount: Number(recipeBean.amountNeededToBeRoasted) / 1000,
-        });
+        if (String(recipeBean.name).length > 0) {
+          beans.push({
+            name: recipeBean.name,
+            amount: Number(recipeBean.amountNeededToBeRoasted) / 1000,
+          });
+        }
       }
     });
   });
