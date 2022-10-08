@@ -3,10 +3,11 @@ const router = express.Router()
 
 const {
   getAllOrders,
-  getOrder
+  getOrder,
+  updateOrder
 } = require('../controllers/orders')
 router.route('/:id').get(getOrder)
 
-router.route('/').get(getAllOrders)
+router.route('/').get(getAllOrders).post(updateOrder)
 
 module.exports = router

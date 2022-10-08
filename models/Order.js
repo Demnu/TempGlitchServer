@@ -24,6 +24,9 @@ const OrderSchema = new mongoose.Schema({
   supplierName: {
     type: String,
   },
+  lastOrder: {
+    type: Boolean,
+  }
 });
 
 module.exports = mongoose.model("Order", OrderSchema);
