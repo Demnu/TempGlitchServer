@@ -6,6 +6,7 @@ const recipes = require("./routes/recipes");
 const products = require("./routes/products");
 const roasting = require("./routes/roasting");
 const user = require("./routes/user");
+const recipeCodes = require("./routes/recipeCodes");
 const { spawn } = require("child_process");
 const path = require("path");
 const auth = require("./middleware/auth");
@@ -18,8 +19,8 @@ const counter = require("./counter");
 const port = 3000;
 app.use(function (req, res, next) {
   res.header("Access-Control-Expose-Headers", "X-Total-Count, Content-Range");
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000"),
-  // res.header("Access-Control-Allow-Origin", "http://localhost:3001"),
+  // res.header("Access-Control-Allow-Origin", "http://localhost:3000"),
+  res.header("Access-Control-Allow-Origin", "http://localhost:3001"),
     res.header("Access-Control-Allow-Credentials", "true"),
     res.header(
       "Access-Control-Allow-Methods",
@@ -35,15 +36,16 @@ app.options("/*", (_, res) => {
   res.sendStatus(200);
 });
 
-app.use("/api/v1/orders", auth, orders);
-app.use("/api/v1/recipes", auth, recipes);
-app.use("/api/v1/products", auth, products);
-app.use("/api/v1/roasting", auth, roasting);
+// app.use("/api/v1/orders", auth, orders);
+// app.use("/api/v1/recipes", auth, recipes);
+// app.use("/api/v1/products", auth, products);
+// app.use("/api/v1/roasting", auth, roasting);
 
-// app.use("/api/v1/orders", orders);
-// app.use("/api/v1/recipes", recipes);
-// app.use("/api/v1/products", products);
-// app.use("/api/v1/roasting", roasting);
+app.use("/api/v1/orders", orders);
+app.use("/api/v1/recipes", recipes);
+app.use("/api/v1/products", products);
+app.use("/api/v1/roasting", roasting);
+app.use("/api/v1/recipeCodes", recipeCodes);
 
 app.use("/api/v1/user", user);
 
