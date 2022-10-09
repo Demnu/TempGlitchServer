@@ -7,6 +7,7 @@ const products = require("./routes/products");
 const roasting = require("./routes/roasting");
 const user = require("./routes/user");
 const recipeCodes = require("./routes/recipeCodes");
+const blend = require("./routes/blend");
 const { spawn } = require("child_process");
 const path = require("path");
 const auth = require("./middleware/auth");
@@ -46,6 +47,7 @@ app.use("/api/v1/recipes", recipes);
 app.use("/api/v1/products", products);
 app.use("/api/v1/roasting", roasting);
 app.use("/api/v1/recipeCodes", recipeCodes);
+app.use("/api/v1/blends", blend);
 
 app.use("/api/v1/user", user);
 
