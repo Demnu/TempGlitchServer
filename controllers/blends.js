@@ -1,17 +1,33 @@
 const Blend = require("../models/Blend");
+const Recipe = require("../models/Recipe");
 const createBlend = async (req, res) => {
-  let duplicate = false;
+  let recipesMongo = await Recipe.find({});
+  let recipesReq = req.body.recipes;
+  let blendName = req.body.name;
+  for (let recipeReq of recipesReq) {
+    for (let recipeMongo of recipesMongo) {
+      if (recipeReq._id == recipeMongo._id) {
+        let recipe = await Recipe.findByIdAndUpdate(
+          { _id: recipeMongo._id },
+          { blendName: blendName },
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+        break;
+      }
+    }
+  }
 
-  console.log(req.body);
+  let duplicate = false;
   result = await Blend.create(req.body).catch(function (error) {
     console.log(error);
     duplicate = true;
   });
   if (duplicate) {
     console.log("is a duplicate");
-    res
-      .status(400)
-      .send("Error! The code and/or blend name has already been saved");
+    res.status(400).send("Error! Blend already exists");
   } else {
     console.log("is not a duplicate");
     res.status(201).send(result);
@@ -31,8 +47,25 @@ const getBlends = async (req, res) => {
   res.status(201).send(blends);
 };
 const deleteBlend = async (req, res) => {
-  console.log(req.params);
-  const blend = await Blend.findOneAndDelete({ _id: req.params.id });
+  let blend;
+  try {
+    blend = await Blend.findById({ _id: req.params.id });
+  } catch (e) {
+    console.log(e);
+  }
+  let recipes = blend.recipes;
+
+  for (let recipeRemoved of recipes) {
+    let recipe = await Recipe.findByIdAndUpdate(
+      { _id: recipeRemoved._id },
+      { blendName: "" },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+  }
+  blend = await Blend.findOneAndDelete({ _id: req.params.id });
   if (!blend) {
     res.status(404).send("No blend with id: " + req.params.id);
   } else {
@@ -41,7 +74,41 @@ const deleteBlend = async (req, res) => {
 };
 
 const updateBlend = async (req, res) => {
-  const t = req.body;
+  console.log(req.body.name);
+  let recipesMongo = await Recipe.find({});
+  let recipesRemoved = req.body.recipesRemoved;
+
+  for (let recipeRemoved of recipesRemoved) {
+    for (let recipeMongo of recipesMongo) {
+      if (recipeRemoved._id == recipeMongo._id) {
+        let recipe = await Recipe.findByIdAndUpdate(
+          { _id: recipeMongo._id },
+          { blendName: "" },
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+        break;
+      }
+    }
+  }
+  let recipesReq = req.body.recipes;
+  for (let recipeReq of recipesReq) {
+    for (let recipeMongo of recipesMongo) {
+      if (recipeReq._id == recipeMongo._id) {
+        let recipe = await Recipe.findByIdAndUpdate(
+          { _id: recipeMongo._id },
+          { blendName: req.body.name },
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+        break;
+      }
+    }
+  }
 
   try {
     const blend = await Blend.findOneAndUpdate(
@@ -54,7 +121,7 @@ const updateBlend = async (req, res) => {
     );
     res.status(201).send(blend);
   } catch (e) {
-    res.status(404).send("Could not update the recipe code!");
+    res.status(404).send("Could not update the blend!");
   }
 };
 module.exports = {
