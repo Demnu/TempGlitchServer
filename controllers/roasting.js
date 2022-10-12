@@ -3,7 +3,7 @@ const Calculation = require("../models/Calculation");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Recipe = require("../models/Recipe");
-
+const Blend = require("../models/Blend");
 const makeCalculation = async (req, res) => {
   //retrieve all orders chosen
   var ordersReq = req.body.orderIDs;
@@ -61,7 +61,7 @@ const makeCalculation = async (req, res) => {
   recipesMongo.forEach((recipe) => {
     productTally.forEach((product) => {
       if (recipe.product === product.id) {
-        product.id = product.id + "*";
+        product.id = product.id;
         product.hasRecipe = true;
         recipes.push({
           product: product.id,
@@ -148,6 +148,7 @@ const makeCalculation = async (req, res) => {
       }
     });
   });
+
   var data = [];
   data.push(beans);
   data.push(productTally);
@@ -173,11 +174,11 @@ const getCalculations = async (req, res) => {
   Calculation.find({}, function (err, calculations) {
     var calculationsMap = [];
     calculations.forEach(function (calculation) {
-      date = new Date(calculation.date)
+      date = new Date(calculation.date);
       let day = date.getDate();
       let month = date.getMonth() + 1;
       let year = date.getFullYear();
-      let dateStr = day + "/" + month + "/" + year
+      let dateStr = day + "/" + month + "/" + year;
       calculationsMap.push({
         id: calculation._id,
         title: calculation.title,
@@ -185,6 +186,8 @@ const getCalculations = async (req, res) => {
         products: calculation.products,
         beans: calculation.beans,
         orderIDs: calculation.orderIDs,
+        roastingCalculation: calculation.roastingCalculation,
+        calculatedRoastingList: calculation.roastingCalculation.length > 0,
       });
     });
     res.send(calculationsMap.reverse());
@@ -201,9 +204,110 @@ const deleteCalculation = async (req, res, next) => {
   }
 };
 
+const calculateRoastingList = async (req, res) => {
+  // const products = req.body.products;
+  let recipesMongo = await Recipe.find({});
+  let products = req.body.products;
+  let recipes = [];
+
+  //calculate total of beans roasted in each recipe
+  const getNumber = (value) => {
+    if (isNaN(value)) {
+      return 0;
+    }
+    return Number(value);
+  };
+  for (let recipe of recipesMongo) {
+    if (recipe.blendName.length > 0) {
+      let tempRecipe = {};
+      tempRecipe.name = recipe.product;
+      tempRecipe.blendName = recipe.blendName;
+      tempRecipe.totalBeans = 0;
+      tempRecipe.totalBeans += getNumber(recipe.bean1Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean2Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean3Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean4Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean5Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean6Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean7Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean8Amount);
+      recipes.push(tempRecipe);
+    } else {
+      let tempRecipe = {};
+      tempRecipe.name = recipe.product;
+      tempRecipe.blendName = "";
+      tempRecipe.totalBeans = 0;
+      tempRecipe.totalBeans += getNumber(recipe.bean1Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean2Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean3Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean4Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean5Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean6Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean7Amount);
+      tempRecipe.totalBeans += getNumber(recipe.bean8Amount);
+      recipes.push(tempRecipe);
+    }
+  }
+  let blendsMap = new Map();
+
+  for (let product of products) {
+    // if (product.hasRecipe) {
+    if (true) {
+      for (let recipe of recipes) {
+        if (product.id === recipe.name || product.id === recipe.name + "*") {
+          if (recipe.blendName.length > 0) {
+            blendsMap.set(
+              recipe.blendName,
+              blendsMap.get(recipe.blendName) +
+                (recipe.totalBeans * product.amount) / 1000 ||
+                (recipe.totalBeans * product.amount) / 1000
+            );
+          } else {
+            blendsMap.set(
+              product.id,
+              blendsMap.get(product.id) +
+                (recipe.totalBeans * product.amount) / 1000 ||
+                (recipe.totalBeans * product.amount) / 1000
+            );
+          }
+          break;
+        }
+      }
+    }
+  }
+  let blends = [];
+  blendsMap.forEach((value, key) => {
+    let tempBlend = {};
+    tempBlend.id = Math.random();
+    tempBlend.blendName = key;
+    tempBlend.overflow = 0;
+    tempBlend.coffeeOrdered = value;
+    tempBlend.production = 0;
+    tempBlend.green = 0;
+    blends.push(tempBlend);
+  });
+  res.status(200).send(blends);
+};
+
+const saveRoastingCalculation = async (req, res) => {
+  let calculationID = req.body._id;
+  let roastingCalculation = req.body.roastingCalculation;
+  let calculation = await Calculation.findByIdAndUpdate(
+    { _id: calculationID },
+    { roastingCalculation: roastingCalculation },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  res.status(201).send(calculation);
+};
+
 module.exports = {
   saveCalculation,
   getCalculations,
   deleteCalculation,
   makeCalculation,
+  calculateRoastingList,
+  saveRoastingCalculation,
 };

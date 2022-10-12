@@ -1,31 +1,35 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
 const CalculationSchema = new mongoose.Schema({
-title: {
+  title: {
     type: String,
-    required: [true, 'must provide title'],
+    required: [true, "must provide title"],
     //maxlength: [20, 'name can not be more than 20 characters'],
-    },
-  date:{
-    type:Date,
-    required: true
   },
-  orderIDs:{
-    type:Array,
-    "orderIDs" : {},
-    required: true
+  date: {
+    type: Date,
+    required: true,
   },
-  products:{
-    type:Array,
-    "products" : {},
-    required: true
+  orderIDs: {
+    type: Array,
+    orderIDs: {},
+    required: true,
   },
-  beans:{
-    type:Array,
-    "beans:" : {},
-    required: true
+  products: {
+    type: Array,
+    products: {},
+    required: true,
   },
+  beans: {
+    type: Array,
+    "beans:": {},
+    required: true,
+  },
+  roastingCalculation: {
+    type: Array,
+    roastingCalculation: {},
+    required: false,
+  },
+});
 
-})
-
-module.exports = mongoose.model('Calculation', CalculationSchema)
+module.exports = mongoose.model("Calculation", CalculationSchema);
