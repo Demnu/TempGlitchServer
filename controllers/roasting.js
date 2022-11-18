@@ -284,6 +284,8 @@ const calculateRoastingList = async (req, res) => {
     tempBlend.coffeeOrdered = value;
     tempBlend.production = 0;
     tempBlend.green = 0;
+    tempBlend.batchSize = 0;
+    tempBlend.numberOfRoasts = 0;
     blends.push(tempBlend);
   });
   res.status(200).send(blends);
