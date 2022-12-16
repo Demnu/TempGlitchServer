@@ -85,6 +85,9 @@ for i in mail_ids:
             if "Order Confirmation - Flamingo Coffee Roasters" in mail_subject:
                 f.write(mail_subject)
                 f.write(mail_content)
+            if "Order Confirmation - DISTRIBUTION ROASTERS" in mail_subject:
+                f.write(mail_subject)
+                f.write(mail_content)
 print("Done Saving")
 
 f.close
