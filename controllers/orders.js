@@ -1,5 +1,16 @@
 const Order = require("../models/Order");
 
+function compareDateInOrder( a, b ) {
+  if ( a.date < b.date ){
+    return -1;
+  }
+  if ( a.date > b.date ){
+    return 1;
+  }
+  return 0;
+}
+
+
 const getAllOrders = async (req, res) => {
   Order.find({}, function (err, orders) {
     var ordersMap = [];
@@ -15,7 +26,9 @@ const getAllOrders = async (req, res) => {
         lastOrder: order.lastOrder
       });
     });
+    ordersMap.sort(compareDateInOrder)
     res.setHeader("Content-Range", orders.length);
+
     res.send(ordersMap);
   });
 };
