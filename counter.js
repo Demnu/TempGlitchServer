@@ -58,6 +58,15 @@ async function readEmails(lines) {
   data = [];
   console.log("finished reading and saving");
 }
+const deleteOrder = async (order) => {
+  try {
+    const task = await Order.deleteOne({orderID: order.orderID});
+    console.log(`Order ${order.orderID} deleted`);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 function createOrderObjects(ordersWordList) {
   let orders = [];
 
@@ -101,8 +110,13 @@ function getProducts(order, orderObject) {
     for (let i = 0; i < indexSKU; i++) {
       product.id += order[i] + " ";
     }
-    product.amount = order[indexSKU+1];
-    order = order.slice(indexSKU+4);
+    for (let i = indexSKU + 1; i < order.length; i++) {
+      if (order[i].includes("$")) {
+        product.amount = order[i - 1];
+        order = order.slice(i + 2);
+        break;
+      }
+    }
     product.id = product.id.slice(0, -1);
     products.push(product);
   }
