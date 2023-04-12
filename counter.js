@@ -83,7 +83,7 @@ function createOrderObjects(ordersWordList) {
 }
 function getProducts(order, orderObject) {
   let products = [];
-  const isWord_Price = (element) => element === "Price";
+  const isWord_Price = (element) => element === "Total";
   const indexPrice = order.findIndex(isWord_Price);
   const isWord_Subtotal = (element) => element === "Subtotal";
   const indexSubtotal = order.findIndex(isWord_Subtotal);
@@ -101,13 +101,8 @@ function getProducts(order, orderObject) {
     for (let i = 0; i < indexSKU; i++) {
       product.id += order[i] + " ";
     }
-    for (let i = indexSKU + 1; i < order.length; i++) {
-      if (order[i].includes("$")) {
-        product.amount = order[i - 1];
-        order = order.slice(i + 1);
-        break;
-      }
-    }
+    product.amount = order[indexSKU+1];
+    order = order.slice(indexSKU+4);
     product.id = product.id.slice(0, -1);
     products.push(product);
   }
@@ -161,7 +156,7 @@ function get_customerName_customerID(order, orderObject) {
   let asteriskCounter = 0;
   let hasTwoAsterisks = false;
   let customerIDIndex;
-  const isWord_To = (element) => element === "To";
+  const isWord_To = (element) => element === "From";
   const indexTo = order.findIndex(isWord_To);
   for (let i = indexTo + 1; i < order.length; i++) {
     if (hasTwoAsterisks) {
@@ -173,7 +168,6 @@ function get_customerName_customerID(order, orderObject) {
         asteriskCounter++;
         if (asteriskCounter === 2) {
           hasTwoAsterisks = true;
-          customerIDIndex = i + 2;
         }
       }
     }
@@ -185,10 +179,12 @@ function get_customerName_customerID(order, orderObject) {
     return customerNameStr.slice(0, -1);
   };
   orderObject.customerName = removeAsterisksandSpace(customerName);
-  orderObject.customerID = order[customerIDIndex].substring(3);
-  if (customerName.includes("Pino")) {
-    console.log("found");
-  }
+
+  //get customer id
+  const isWord_Customer = (element) => element === "Customer";
+  const indexCustomer = order.findIndex(isWord_Customer);
+  let idStr = order[indexCustomer+1];
+  orderObject.customerID = idStr.substring(3)
   return orderObject;
 }
 function get_date_orderID(order, orderObject) {
@@ -222,8 +218,7 @@ function splitListIntoOrders(wordsList) {
     if (!foundStart) {
       if (
         wordsList[i].includes("Order") &&
-        wordsList[i + 1].includes("Confirmation") &&
-        wordsList[i + 2].includes("To")
+        wordsList[i + 1].includes("Confirmation") 
       ) {
         foundStart = true;
         stringOrder.push(wordsList[i]);
@@ -514,7 +509,7 @@ const createProduct = async (product) => {
 const createOrder = async (order) => {
   try {
     const task = await Order.create(order);
-    console.log(`Order ${order} saved`);
+    console.log(`Order ${order.id} saved`);
   } catch (err) {
     console.error(err);
   }
