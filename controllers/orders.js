@@ -1,10 +1,12 @@
 const Order = require("../models/Order");
 
 function compareDateInOrder( a, b ) {
-  if ( a.date < b.date ){
+  var d1 = new Date(a.date);
+  var d2 = new Date(b.date);
+  if ( d1 < d2){
     return -1;
   }
-  if ( a.date > b.date ){
+  if ( d1 > d2 ){
     return 1;
   }
   return 0;
