@@ -76,16 +76,7 @@ for i in mail_ids:
                 mail_content = message.get_payload()
 
             # and then let's show its result
-            if "Order Confirmation - Glitch Coffee" in mail_subject:
-                f.write(mail_subject)
-                f.write(mail_content)
-            if "Order Confirmation - ATTN." in mail_subject:
-                f.write(mail_subject)
-                f.write(mail_content)
-            if "Order Confirmation - Flamingo Coffee Roasters" in mail_subject:
-                f.write(mail_subject)
-                f.write(mail_content)
-            if "Order Confirmation - DISTRIBUTION ROASTERS" in mail_subject:
+            if "Order Confirmation" in mail_content:
                 f.write(mail_subject)
                 f.write(mail_content)
 print("Done Saving")

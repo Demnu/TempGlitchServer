@@ -139,8 +139,7 @@ function getSupplier(order, orderObject) {
   let supplierName = "";
   let asteriskCounter = 0;
   let hasTwoAsterisks = false;
-  const isWord_From = (element) => element === "From";
-  const indexFrom = order.findIndex(isWord_From);
+  const indexFrom = order.findIndex(element => element.includes("ID"));
   for (let i = indexFrom + 1; i < order.length; i++) {
     if (hasTwoAsterisks) {
       break;
