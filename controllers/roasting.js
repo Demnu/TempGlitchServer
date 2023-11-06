@@ -12,22 +12,13 @@ const makeCalculation = async (req, res) => {
   }
   start = Date.now();
   var orders = [];
-  ordersMongo = await Order.find();
-  ordersMongo.forEach((order) => {
-    for (var i = 0; i < ordersReq.length; i++) {
-      if (ordersReq[i] === order.orderID) {
-        orders.push({
-          id: order.orderID,
-          customerName: order.customerName,
-          date: order.date,
-          products: order.products,
-        });
-      }
-    }
-  });
+  var orders = await Order.find({
+    'orderID': { $in: ordersReq }
+  }).lean(); // Selects only the necessary fields and excludes the Mongo default '_id'
+
   //retrive products list
   var productsMongo = [];
-  productsMongo = await Product.find();
+  productsMongo = await Product.find().lean();
 
   var productTally = [];
   productsMongo.forEach((product) => {
@@ -61,8 +52,7 @@ const makeCalculation = async (req, res) => {
   recipesMongo.forEach((recipe) => {
     productTally.forEach((product) => {
       if (recipe.product === product.id) {
-        product.id = product.id;
-        product.hasRecipe = true;
+        product.id = product.id + "*";
         recipes.push({
           product: product.id,
           tally: product.amount,
@@ -139,16 +129,13 @@ const makeCalculation = async (req, res) => {
         return true;
       });
       if (!duplicate) {
-        if (String(recipeBean.name).length > 0) {
-          beans.push({
-            name: recipeBean.name,
-            amount: Number(recipeBean.amountNeededToBeRoasted) / 1000,
-          });
-        }
+        beans.push({
+          name: recipeBean.name,
+          amount: Number(recipeBean.amountNeededToBeRoasted) / 1000,
+        });
       }
     });
   });
-
   var data = [];
   data.push(beans);
   data.push(productTally);
