@@ -12,13 +12,22 @@ const makeCalculation = async (req, res) => {
   }
   start = Date.now();
   var orders = [];
-  var orders = await Order.find({
-    'orderID': { $in: ordersReq }
-  }).lean(); // Selects only the necessary fields and excludes the Mongo default '_id'
-
+  ordersMongo = await Order.find();
+  ordersMongo.forEach((order) => {
+    for (var i = 0; i < ordersReq.length; i++) {
+      if (ordersReq[i] === order.orderID) {
+        orders.push({
+          id: order.orderID,
+          customerName: order.customerName,
+          date: order.date,
+          products: order.products,
+        });
+      }
+    }
+  });
   //retrive products list
   var productsMongo = [];
-  productsMongo = await Product.find().lean();
+  productsMongo = await Product.find();
 
   var productTally = [];
   productsMongo.forEach((product) => {
@@ -52,7 +61,8 @@ const makeCalculation = async (req, res) => {
   recipesMongo.forEach((recipe) => {
     productTally.forEach((product) => {
       if (recipe.product === product.id) {
-        product.id = product.id + "*";
+        product.id = product.id;
+        product.hasRecipe = true;
         recipes.push({
           product: product.id,
           tally: product.amount,
@@ -129,13 +139,16 @@ const makeCalculation = async (req, res) => {
         return true;
       });
       if (!duplicate) {
-        beans.push({
-          name: recipeBean.name,
-          amount: Number(recipeBean.amountNeededToBeRoasted) / 1000,
-        });
+        if (String(recipeBean.name).length > 0) {
+          beans.push({
+            name: recipeBean.name,
+            amount: Number(recipeBean.amountNeededToBeRoasted) / 1000,
+          });
+        }
       }
     });
   });
+
   var data = [];
   data.push(beans);
   data.push(productTally);
@@ -190,13 +203,11 @@ const deleteCalculation = async (req, res, next) => {
     res.status(200).json({ recipe });
   }
 };
-
 const calculateRoastingList = async (req, res) => {
   // const products = req.body.products;
   let recipesMongo = await Recipe.find({});
   let products = req.body.products;
   let recipes = [];
-
   //calculate total of beans roasted in each recipe
   const getNumber = (value) => {
     if (isNaN(value)) {
@@ -205,7 +216,7 @@ const calculateRoastingList = async (req, res) => {
     return Number(value);
   };
   for (let recipe of recipesMongo) {
-    if (recipe.blendName.length > 0) {
+    if (recipe.blendName?.length > 0) {
       let tempRecipe = {};
       tempRecipe.name = recipe.product;
       tempRecipe.blendName = recipe.blendName;
@@ -236,67 +247,66 @@ const calculateRoastingList = async (req, res) => {
     }
   }
   let blendsMap = new Map();
-
-  for (let product of products) {
-    // if (product.hasRecipe) {
-    if (true) {
-      for (let recipe of recipes) {
-        if (product.id === recipe.name || product.id === recipe.name + "*") {
-          if (recipe.blendName.length > 0) {
-            blendsMap.set(
-              recipe.blendName,
-              blendsMap.get(recipe.blendName) +
-                (recipe.totalBeans * product.amount) / 1000 ||
-                (recipe.totalBeans * product.amount) / 1000
-            );
-          } else {
-            blendsMap.set(
-              product.id,
-              blendsMap.get(product.id) +
-                (recipe.totalBeans * product.amount) / 1000 ||
-                (recipe.totalBeans * product.amount) / 1000
-            );
-          }
-          break;
+for (let product of products) {
+  // if (product.hasRecipe) {
+  if (true) {
+    for (let recipe of recipes) {
+      if (product.id === recipe.name || product.id === recipe.name + "*") {
+        if (recipe.blendName.length > 0) {
+          blendsMap.set(
+            recipe.blendName,
+            blendsMap.get(recipe.blendName) +
+              (recipe.totalBeans * product.amount) / 1000 ||
+              (recipe.totalBeans * product.amount) / 1000
+          );
+        } else {
+          blendsMap.set(
+            product.id,
+            blendsMap.get(product.id) +
+              (recipe.totalBeans * product.amount) / 1000 ||
+              (recipe.totalBeans * product.amount) / 1000
+          );
         }
+        break;
       }
     }
   }
-  let blends = [];
-  blendsMap.forEach((value, key) => {
-    let tempBlend = {};
-    tempBlend.id = Math.random();
-    tempBlend.blendName = key;
-    tempBlend.overflow = 0;
-    tempBlend.coffeeOrdered = value;
-    tempBlend.production = 0;
-    tempBlend.green = 0;
-    tempBlend.batchSize = 0;
-    tempBlend.numberOfRoasts = 0;
-    blends.push(tempBlend);
-  });
-  res.status(200).send(blends);
+}
+let blends = [];
+blendsMap.forEach((value, key) => {
+  let tempBlend = {};
+  tempBlend.id = Math.random();
+  tempBlend.blendName = key;
+  tempBlend.overflow = 0;
+  tempBlend.coffeeOrdered = value;
+  tempBlend.production = 0;
+  tempBlend.green = 0;
+  tempBlend.batchSize = 0;
+  tempBlend.numberOfRoasts = 0;
+  blends.push(tempBlend);
+});
+res.status(200).send(blends);
 };
 
 const saveRoastingCalculation = async (req, res) => {
-  let calculationID = req.body._id;
-  let roastingCalculation = req.body.roastingCalculation;
-  let calculation = await Calculation.findByIdAndUpdate(
-    { _id: calculationID },
-    { roastingCalculation: roastingCalculation },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-  res.status(201).send(calculation);
+let calculationID = req.body._id;
+let roastingCalculation = req.body.roastingCalculation;
+let calculation = await Calculation.findByIdAndUpdate(
+  { _id: calculationID },
+  { roastingCalculation: roastingCalculation },
+  {
+    new: true,
+    runValidators: true,
+  }
+);
+res.status(201).send(calculation);
 };
 
 module.exports = {
-  saveCalculation,
-  getCalculations,
-  deleteCalculation,
-  makeCalculation,
-  calculateRoastingList,
-  saveRoastingCalculation,
+saveCalculation,
+getCalculations,
+deleteCalculation,
+makeCalculation,
+calculateRoastingList,
+saveRoastingCalculation,
 };
