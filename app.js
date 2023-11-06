@@ -79,6 +79,7 @@ const start = async () => {
     console.log(error);
   }
 };
+start()
 // const executeReadEmailScript = () => {
 //   const python = spawn(process.env.PYTHON_CMD, [
 //     "readEmails.py",
